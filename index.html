@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Muse Switch Kit: Bring Your AI Setup With You, Leave With a Muse Agent</title>
+<style>
+  :root{
+    --ink:#1a2433; --muted:#5d6b7a; --line:#dde3ea; --bg:#f5f6f8; --card:#ffffff;
+    --accent:#1c5d8f; --accent-soft:#e8f0f7; --good:#177245; --warn:#a15c00; --bad:#b3261e;
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+  header{background:linear-gradient(120deg,#10273f,#1c5d8f);color:#fff;padding:34px 20px 28px}
+  .wrap{max-width:1060px;margin:0 auto;padding:0 18px}
+  header h1{margin:0 0 6px;font-size:30px;letter-spacing:.2px}
+  header p{margin:0;max-width:760px;color:#cfdfed;font-size:16px}
+  header p.framing{margin-top:12px;font-size:18px;color:#fff;font-weight:600}
+  .badges{margin-top:14px;display:flex;gap:8px;flex-wrap:wrap}
+  .badge{border:1px solid rgba(255,255,255,.45);color:#f3d9a4;border-radius:999px;padding:3px 11px;font-size:12.5px}
+  .steps{display:flex;gap:8px;margin:22px 0 14px;flex-wrap:wrap}
+  .step-tab{flex:1;min-width:170px;text-align:left;border:1px solid var(--line);background:var(--card);border-radius:var(--radius);padding:12px 14px;cursor:pointer;font-size:15px}
+  .step-tab b{display:block;font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+  .step-tab.active{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+  .step-tab.done b{color:var(--good)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;margin-bottom:18px}
+  .card h2{margin:0 0 6px;font-size:21px}
+  .card .sub{color:var(--muted);margin:0 0 16px;font-size:14.5px}
+  label{display:block;font-weight:600;font-size:14px;margin:14px 0 5px}
+  input[type=text],input[type=number],textarea,select{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:15px;font-family:inherit;background:#fff}
+  textarea{min-height:110px;resize:vertical}
+  textarea.big{min-height:230px}
+  textarea.small{min-height:64px}
+  .hint{font-size:13px;color:var(--muted);margin-top:4px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:760px){.row{grid-template-columns:1fr}}
+  .btn{display:inline-block;border:0;border-radius:10px;padding:11px 18px;font-size:15px;font-weight:600;cursor:pointer;background:var(--accent);color:#fff}
+  .btn.secondary{background:#e8ecf4;color:var(--ink)}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+  .radio-group,.check-group{display:grid;gap:9px;margin-top:6px}
+  .radio-group label,.check-group label{font-weight:500;margin:0;display:flex;gap:9px;align-items:flex-start;font-size:15px;cursor:pointer}
+  .radio-group input,.check-group input{margin-top:4px}
+  .radio-group .desc,.check-group .desc{display:block;color:var(--muted);font-size:13px}
+  .err{background:#fdeceb;border:1px solid #f3c2bf;color:var(--bad);border-radius:10px;padding:10px 13px;font-size:14px;margin-top:12px;display:none}
+  pre.charter{background:#101c2b;color:#d7e6f5;border-radius:10px;padding:16px;font-size:13px;line-height:1.55;white-space:pre-wrap;word-wrap:break-word;max-height:460px;overflow:auto}
+  .honest{background:#fdf6e8;border:1px solid #ecd9ae;border-radius:12px;padding:14px 17px;font-size:15px;margin-bottom:16px}
+  .counts{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 14px}
+  .count-chip{border-radius:999px;padding:4px 12px;font-size:13.5px;font-weight:600;border:1px solid var(--line)}
+  .count-chip.carried{background:#eef6ee;border-color:#bcdcc4;color:var(--good)}
+  .count-chip.adapted{background:var(--accent-soft);border-color:#b9d2e6;color:var(--accent)}
+  .count-chip.noneq{background:#fdf6e8;border-color:#ecd9ae;color:var(--warn)}
+  .bucket-head{font-size:16px;margin:20px 0 4px}
+  .bucket-head .n{color:var(--muted);font-weight:500;font-size:14px}
+  .bucket-sub{color:var(--muted);font-size:13.5px;margin:0 0 8px}
+  .item-card{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-top:9px}
+  .item-card .orig{font-size:15px}
+  .item-card .rewritten{font-size:14.5px;margin-top:8px;background:var(--accent-soft);border-radius:8px;padding:8px 11px}
+  .item-card .rewritten b{color:var(--accent)}
+  .item-card .why{font-size:13.5px;color:var(--muted);margin-top:6px}
+  .item-card .workaround{font-size:14px;margin-top:8px;background:#fdf6e8;border-radius:8px;padding:8px 11px}
+  .item-card .move{display:flex;gap:8px;align-items:center;margin-top:10px;font-size:13.5px;color:var(--muted)}
+  .item-card .move select{width:auto;padding:6px 9px;font-size:13.5px}
+  .matrix-row{display:grid;grid-template-columns:1fr 1.5fr;gap:12px;border:1px solid var(--line);border-radius:10px;padding:12px 13px;margin-top:9px}
+  @media(max-width:760px){.matrix-row{grid-template-columns:1fr}}
+  .matrix-row .m-label{font-weight:600;font-size:15px}
+  .matrix-row .m-desc{color:var(--muted);font-size:13px}
+  .matrix-opts{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+  .matrix-opts label{font-weight:500;margin:0;display:flex;gap:6px;align-items:center;font-size:14px;cursor:pointer}
+  .finalstep{background:var(--accent-soft);border:1px solid var(--accent);border-radius:12px;padding:18px;margin-top:20px}
+  .finalstep h3{margin:0 0 8px;font-size:18px}
+  .finalstep p{margin:0 0 12px;font-size:15px}
+  .finalstep pre.charter{max-height:380px}
+  .ok{color:var(--good);font-weight:600}
+  footer{color:var(--muted);font-size:13.5px;padding:8px 0 42px}
+  footer a{color:var(--accent)}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>Muse Switch Kit</h1>
+    <p>You spent months teaching another AI platform how you work: the instructions, the tone, the rules, the setup. None of that work should be stranded. Paste it here, see honestly what carries over, and leave with a Muse agent brief that has something most setups never had: a soul.</p>
+    <p class="framing">Bring everything you built. It deserves a better home.</p>
+    <div class="badges">
+      <span class="badge">Muse first</span>
+      <span class="badge">Honest conversion report</span>
+      <span class="badge">Soul included</span>
+      <span class="badge">You stay in charge</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="steps" role="tablist">
+    <button class="step-tab active" id="tab1" onclick="goStep(1)"><b>Step 1</b>Bring your setup</button>
+    <button class="step-tab" id="tab2" onclick="goStep(2)"><b>Step 2</b>Map it</button>
+    <button class="step-tab" id="tab3" onclick="goStep(3)"><b>Step 3</b>Add the soul</button>
+    <button class="step-tab" id="tab4" onclick="goStep(4)"><b>Step 4</b>Leave with the brief</button>
+  </div>
+
+  <!-- STEP 1 -->
+  <section class="card" id="panel1">
+    <h2>Bring the setup you already built</h2>
+    <p class="sub">Whatever you have counts: custom instructions, a system prompt, a custom GPT or agent configuration, saved prompts, or plain notes about how you use your current assistant. Paste it exactly as it is. The kit sorts it in the next step.</p>
+    <label>Where is your setup coming from?</label>
+    <div class="radio-group" id="platformGroup"></div>
+    <label for="sourceText">Your current setup, pasted as is</label>
+    <textarea id="sourceText" class="big" placeholder="Paste your custom instructions, system prompt, agent configuration, or notes here. A few lines is fine. A full configuration is fine too."></textarea>
+    <label for="useCase">What do you mainly use your assistant for? (optional, one line)</label>
+    <input type="text" id="useCase" placeholder="e.g. Marketing for my two fitness studios">
+    <div class="btn-row">
+      <button class="btn secondary" onclick="loadSample()">Try with a sample setup</button>
+      <button class="btn" onclick="step1Continue()">Map my setup</button>
+    </div>
+    <p class="hint">The sample is a realistic ChatGPT custom instructions setup for a fictional marketing consultant, included so you can see the whole kit work in one click.</p>
+    <div class="err" id="err1"></div>
+  </section>
+
+  <!-- STEP 2 -->
+  <section class="card hidden" id="panel2">
+    <h2>Your conversion report</h2>
+    <p class="sub">Here is what your setup becomes on Muse, sorted into three honest buckets. Nothing is silently dropped and nothing is faked: a rewrite is claimed only where the kit actually rewrote something.</p>
+    <div class="honest"><b>A smart first pass based on rules, not magic.</b> The kit sorts your lines with plain, visible rules. If a line landed in the wrong bucket, move it. Your call wins, and the brief follows your sorting.</div>
+    <div class="counts" id="countsRow"></div>
+    <div id="reportLists"></div>
+    <div class="btn-row">
+      <button class="btn ghost" onclick="goStep(1)">Back</button>
+      <button class="btn" onclick="goStep(3)">Continue to the soul</button>
+    </div>
+  </section>
+
+  <!-- STEP 3: SOUL -->
+  <section class="card hidden" id="panel3">
+    <h2>Add the soul your setup never had</h2>
+    <p class="sub">Most setups that arrive here are pure instructions: what to do, how to sound, what to avoid. Almost none of them say who the agent is. That is the upgrade. Name it, give it a character and values, draw the lines it never crosses, and approve the voice it will speak in. Everything here lands in Section 1 of your brief.</p>
+    <div class="row">
+      <div>
+        <label for="userName">Your name (optional)</label>
+        <input type="text" id="userName" placeholder="e.g. Dana Ortiz">
+      </div>
+      <div>
+        <label for="agentName">Name your agent</label>
+        <input type="text" id="agentName" placeholder="Leave blank and the kit suggests one">
+        <p class="hint">The brief never ships with an empty name.</p>
+      </div>
+    </div>
+    <label for="soulIdentity">Identity statement</label>
+    <input type="text" id="soulIdentity">
+    <p class="hint">One line, written for you from what you converted: "You are NAME, my ..." Edit it freely. What you leave here is what the brief carries.</p>
+    <div class="btn-row" style="margin-top:8px">
+      <button class="btn ghost" onclick="regenerateIdentity()">Rewrite it for me</button>
+    </div>
+    <label>Character: how the agent carries itself</label>
+    <div class="check-group" id="bearingGroup"></div>
+    <label>Values: what it optimizes for, and what it refuses</label>
+    <div class="check-group" id="valueGroup"></div>
+    <label for="valuesText">Your own values, one per line</label>
+    <textarea id="valuesText" class="small" placeholder="e.g. My regulars get remembered by name"></textarea>
+    <label>Never-do rules</label>
+    <div class="check-group" id="neverGroup"></div>
+    <label for="neverDoText">Your own never-do rules, one per line, in your words</label>
+    <textarea id="neverDoText" class="small" placeholder="e.g. Never quote a price that is not on the current rate card"></textarea>
+    <p class="hint">These lines are copied into the brief exactly as you write them. Your words outrank the presets.</p>
+    <label for="voiceSample">Voice in messages: your approved sample line</label>
+    <textarea id="voiceSample" class="small"></textarea>
+    <p class="hint">Generated from your converted setup. Approve it as is, or edit it until it sounds like the agent you want speaking for you. The text you leave in this box is the text that ships.</p>
+    <div class="btn-row" style="margin-top:8px">
+      <button class="btn ghost" onclick="regenerateVoice()">Regenerate the sample</button>
+    </div>
+    <label>Approval boundaries: what the agent may do, and what waits for you</label>
+    <p class="hint" style="margin-top:0">Your old setup probably never drew these lines. Draw them now. The defaults are deliberately conservative: anything that sends, spends, posts, or deletes waits for you.</p>
+    <div id="matrixList"></div>
+    <div class="btn-row">
+      <button class="btn ghost" onclick="goStep(2)">Back</button>
+      <button class="btn" onclick="goStep(4)">Build my brief</button>
+    </div>
+  </section>
+
+  <!-- STEP 4 -->
+  <section class="card hidden" id="panel4">
+    <h2>Your Muse agent brief</h2>
+    <p class="sub">One clean brief, ready to paste into Muse: who your agent is, what it does, and where you stay in charge. Anything that could not move is listed after the brief with its workaround, in plain sight, not buried.</p>
+    <div class="finalstep">
+      <h3>Final step: create your agent in Muse</h3>
+      <p><b>Copy the final output below and paste it into Muse. Your agent is created from this brief.</b> Copy and paste is the bridge today: there is no Muse login or provisioning API yet, so nothing is transferred automatically. You paste it, you stay in control of the move.</p>
+      <pre class="charter" id="finalOutput"></pre>
+      <div class="btn-row">
+        <button class="btn" onclick="copyBrief()">Copy final output for Muse</button>
+        <button class="btn secondary" onclick="downloadBrief()">Download the brief</button>
+        <button class="btn ghost" onclick="startOver()">Start over</button>
+        <span id="copyNote" class="ok"></span>
+      </div>
+      <p class="hint">Bring everything you built. It deserves a better home. Now it has one, and this time it has a soul.</p>
+    </div>
+    <div class="btn-row">
+      <button class="btn ghost" onclick="goStep(3)">Back to the soul</button>
+    </div>
+    <div class="err" id="err4"></div>
+  </section>
+
+  <footer>
+    <p>Muse Switch Kit is part of the agent portfolio of Greg Lucas, Founder of pAIgeBreaker and AIccountable, creator of the AGENT Framework. Sibling studios: <a href="https://owner-agent-studio.vercel.app">Owner Agent Studio</a> (design a governed personal agent from scratch) and <a href="https://courseagent-studio.vercel.app">CourseAgent Studio</a> (the same pattern for faculty). This kit runs entirely in your browser: nothing you paste here is sent anywhere, and your work autosaves on this device only.</p>
+  </footer>
+</main>
+
+<script id="agent-core">
+/* Muse Switch Kit core logic. Pure functions, no DOM access, so the same
+   code that parses, classifies, and builds the brief in the browser can be
+   tested in Node. The kit's honesty law: a rewrite is only claimed where a
+   rule in the mapping table below actually rewrote the line, a capability
+   a pasted brief cannot carry is named as such, and nothing about Muse
+   is invented. */
+
+var PLATFORMS = {
+  chatgpt: { name: "ChatGPT" },
+  claude:  { name: "Claude" },
+  gemini:  { name: "Gemini" },
+  copilot: { name: "Copilot" },
+  other:   { name: "another platform" }
+};
+
+function platformName(id){
+  return (PLATFORMS[id] || PLATFORMS.other).name;
+}
+
+/* The sample: a realistic ChatGPT custom instructions setup for a fictional
+   marketing consultant. It deliberately contains lines that carry over,
+   lines the mapping table adapts, and lines no pasted brief can carry, so
+   the whole kit can be experienced in one click. */
+var SAMPLE_PLATFORM = "chatgpt";
+var SAMPLE_SETUP = [
+  "You are a marketing consultant for independent fitness studios, and you know my business: I run two studios in Austin, and my brand voice is encouraging, never salesy.",
+  "Always write in short paragraphs and plain English. No hype words like game-changer or revolutionary.",
+  "Act like a senior consultant: give me the recommendation first, then the reasoning.",
+  "Remember that my lead magnet is a free first-week pass and my main offer is a 12-week small group program.",
+  "Use the SendOffer action to email the weekly promo to my list every Friday.",
+  "My custom GPT has a knowledge base of uploaded files: my rate card, class schedule, and brand guide. Always check the uploaded files before answering pricing questions.",
+  "Browse the web every Monday and summarize what competing studios are promoting.",
+  "Call the booking API to reserve a studio tour whenever a lead asks for one.",
+  "Remember everything across all our chats so I never have to repeat myself.",
+  "Format social posts as a hook line, three short lines, then a call to action.",
+  "Never mention competitors by name."
+].join("\n");
+var SAMPLE_USE_CASE = "Marketing for my two fitness studios in Austin";
+
+/* ---------- Parsing: pasted text into sortable items ---------- */
+
+/* Split on lines, strip bullet and numbering markers, then split long
+   lines on sentence boundaries. Drop empties, fragments, and bare section
+   headers (short lines ending in a colon). */
+function parseItems(text){
+  var out = [];
+  String(text || "").split(/\n+/).forEach(function(raw){
+    var line = raw.replace(/^\s*(?:[-*•]|\d+[.)])\s+/, "").trim();
+    if (!line) return;
+    if (/^[A-Za-z][A-Za-z /&]{0,40}:$/.test(line)) return;
+    var pieces = line.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [];
+    pieces.forEach(function(p){
+      var s = p.trim();
+      if (s.length >= 8) out.push(s);
+    });
+  });
+  return out;
+}
+
+/* ---------- The three buckets ---------- */
+
+var BUCKETS = [
+  { id: "carried", name: "Carried over",        blurb: "Works as-is in a Muse brief. These lines move word for word." },
+  { id: "adapted", name: "Adapted",             blurb: "Rewritten into Muse brief terms. Each one shows the original, the rewrite, and why." },
+  { id: "noneq",   name: "No equivalent yet",   blurb: "A pasted brief cannot carry these. Each one gets the closest workaround instead of a fake translation." }
+];
+
+function bucketName(id){
+  for (var i = 0; i < BUCKETS.length; i++) if (BUCKETS[i].id === id) return BUCKETS[i].name;
+  return id;
+}
+
+var DEFAULT_WORKAROUND = "No standard workaround is written for this one. Handle it outside the agent, or write the steps into the brief as a manual task the agent prepares and you finish.";
+
+/* Capabilities a pasted brief cannot carry. Checked first: vocabulary
+   adaptation never rescues a capability the format cannot hold. Each rule
+   names the closest Muse-native workaround in one line. */
+var NOEQ_RULES = [
+  { id: "memory",
+    test: function(t){ return /across (all )?(our|my|your) chats/i.test(t) || /persistent(ly)? (memory|remember)/i.test(t) || /long[- ]term memory/i.test(t) || /remember everything/i.test(t) || /past conversations/i.test(t); },
+    workaround: "Write the facts that matter into the Standing context part of your brief (Step 2 shows you which lines became standing context), and paste anything else the agent needs into the Muse conversation." },
+  { id: "files",
+    test: function(t){ return /uploaded files?/i.test(t) || /knowledge base/i.test(t) || /files? (i|you|we) uploaded/i.test(t) || /attached (files?|documents?)/i.test(t) || /\bRAG\b/.test(t); },
+    workaround: "Paste the key pages (prices, schedules, brand rules) into the Standing context part of your brief, or attach the files directly in the Muse conversation." },
+  { id: "browse",
+    test: function(t){ return /browse the (web|internet)/i.test(t) || /browsing (is )?(on|enabled)/i.test(t) || /search the (web|internet)/i.test(t) || /real[- ]time (web|data|search)/i.test(t) || /live (web|browsing)/i.test(t); },
+    workaround: "Keep the research as a written task in the brief and paste in the pages or results you want worked from; a pasted brief cannot switch on live browsing." },
+  { id: "api",
+    test: function(t){ return /\bAPI\b/.test(t) || /api key/i.test(t) || /endpoint/i.test(t) || /webhook/i.test(t) || /zapier/i.test(t) || /make\.com/i.test(t); },
+    workaround: "Describe the step in the brief so the agent prepares everything up to the call; the call itself happens in your own tools or in a connected Muse session." },
+  { id: "interpreter",
+    test: function(t){ return /code interpreter/i.test(t) || /advanced data analysis/i.test(t) || /run (python|code) (on|in)/i.test(t); },
+    workaround: "Paste the data, or attach the file in the Muse conversation, and ask for the analysis as a written task in the brief." },
+  { id: "images",
+    test: function(t){ return /dall[- ]?e/i.test(t) || /generate (an? |the )?image/i.test(t) || /image generation/i.test(t) || /midjourney/i.test(t); },
+    workaround: "Keep image requests as written tasks in the brief and make the images in a tool you already use; a pasted brief cannot switch on an image model." }
+];
+
+/* The mapping table: platform vocabulary to Muse brief vocabulary. An
+   adaptation is claimed only when one of these rules actually fires, and
+   every adaptation carries its WHY. Order matters: first match wins. */
+var ADAPTATIONS = [
+  { id: "gpt",
+    why: "The old platform wrapped these instructions in a custom GPT. Muse agents are created from a written brief, so the same words become brief text instead of a builder configuration.",
+    test: function(t){ return /custom gpts?\b/i.test(t) || /gpt builder/i.test(t) || /my gpts?\b/i.test(t); },
+    rewrite: function(t){
+      return t.replace(/custom gpts?/gi, "Muse agent").replace(/gpt builder/gi, "this brief").replace(/\bgpts?\b/gi, "agent");
+    } },
+  { id: "actions",
+    why: "Actions, plugins, and tools called outside software on their own. A pasted brief cannot switch those on, so the task is kept and rewritten as a step the agent performs with you in conversation, under the approval rules in Section 3.",
+    test: function(t){
+      if (/\bplugins?\b/i.test(t) || /function calling/i.test(t)) return true;
+      /* The marketing idiom "call to action" is not a platform action. */
+      if (/\bactions?\b/i.test(t.replace(/call to action/gi, " "))) return true;
+      if (/\btools?\b/i.test(t) && /(use|using|via|with|call)/i.test(t)) return true;
+      return false;
+    },
+    rewrite: function(t){
+      var m = t.match(/^use the ([\w -]+?) (action|plugin|tool) to (.+)$/i);
+      if (m) { var s = m[3].trim(); return s.charAt(0).toUpperCase() + s.slice(1); }
+      var safe = t.replace(/call to action/gi, "calltoaction");
+      var out = safe.replace(/\bthe plugin\b/gi, "a built-in step").replace(/\ba plugin\b/gi, "a built-in step")
+                    .replace(/\bplugins?\b/gi, "built-in step").replace(/\bactions?\b/gi, "steps").replace(/\btools?\b/gi, "steps");
+      return out.replace(/calltoaction/gi, "call to action");
+    } },
+  { id: "memory",
+    why: "The old platform held facts in a memory feature. A Muse brief carries the facts in writing as standing context, so the agent sees them in every conversation and nothing depends on a platform remembering.",
+    test: function(t){ return /remember/i.test(t) || /memory/i.test(t); },
+    rewrite: function(t){
+      var s = t.replace(/^remember( that)?[:,]?\s+/i, "").replace(/\byour memory of\b/gi, "the facts in this brief about").replace(/\byour memory\b/gi, "the facts written in this brief");
+      s = s.charAt(0).toUpperCase() + s.slice(1);
+      return "Standing context: " + s;
+    } },
+  { id: "instructions",
+    why: "Custom instructions were a settings box on the old platform. In Muse, the same guidance lives inside the agent brief itself, where it travels with the agent.",
+    test: function(t){ return /custom instructions/i.test(t); },
+    rewrite: function(t){
+      return t.replace(/my custom instructions/gi, "the instructions in this brief").replace(/custom instructions/gi, "brief instructions");
+    } }
+];
+
+function noeqRuleFor(t){
+  for (var i = 0; i < NOEQ_RULES.length; i++) if (NOEQ_RULES[i].test(t)) return NOEQ_RULES[i];
+  return null;
+}
+
+function adaptationFor(t){
+  for (var i = 0; i < ADAPTATIONS.length; i++) if (ADAPTATIONS[i].test(t)) return ADAPTATIONS[i];
+  return null;
+}
+
+/* One item, classified. Capabilities a brief cannot carry are checked
+   before vocabulary adaptation; everything else carries over as-is:
+   role and task instructions, tone and style rules, formatting
+   preferences, and do and do-not rules all work unchanged in a brief. */
+function classifyItem(text){
+  var nr = noeqRuleFor(text);
+  if (nr) return { bucket: "noneq", ruleId: nr.id, rewritten: "", why: "", workaround: nr.workaround };
+  var ad = adaptationFor(text);
+  if (ad) return { bucket: "adapted", ruleId: ad.id, rewritten: ad.rewrite(text), why: ad.why, workaround: "" };
+  return { bucket: "carried", ruleId: "", rewritten: "", why: "", workaround: "" };
+}
+
+/* Classify a whole pasted setup. overrides maps an item id to a bucket
+   the user chose in the report; the user's sorting wins over the rules,
+   and missing rewrite or workaround text is filled honestly. */
+function classifySetup(text, platform, overrides){
+  overrides = overrides || {};
+  var items = parseItems(text).map(function(t, i){
+    var c = classifyItem(t);
+    var bucket = overrides[i] || c.bucket;
+    var item = { id: i, original: t, bucket: bucket, ruleId: c.ruleId,
+                 rewritten: c.rewritten, why: c.why, workaround: c.workaround };
+    if (item.bucket === "adapted" && !item.rewritten) item.rewritten = item.original;
+    if (item.bucket === "adapted" && !item.why) item.why = "You moved this line here, so the kit carries it as rewritten brief text in your words.";
+    if (item.bucket === "noneq" && !item.workaround) item.workaround = DEFAULT_WORKAROUND;
+    return item;
+  });
+  return { items: items, counts: countsOf(items), platform: platform || "other" };
+}
+
+function countsOf(items){
+  var c = { carried: 0, adapted: 0, noneq: 0, total: (items || []).length };
+  (items || []).forEach(function(it){ if (c[it.bucket] != null) c[it.bucket]++; });
+  return c;
+}
+
+/* The line that lands in the brief for an item: the rewrite for adapted
+   items, the original for everything else. */
+function effectiveLine(item){
+  return (item.bucket === "adapted" && item.rewritten) ? item.rewritten : item.original;
+}
+
+/* ---------- The soul: who the agent is, added on top of the conversion.
+   Mirrors the Owner Agent Studio soul pattern: name, guided identity,
+   bearings, values, never-do rules, and an approved voice sample. ---------- */
+
+var SOUL_BEARINGS = [
+  { id: "calm",        label: "Calm under pressure", prompt: "Calm under pressure. Bad news arrives early, plainly, and with a proposed fix." },
+  { id: "direct",      label: "Direct",              prompt: "Direct. Say the hard thing plainly and early; never bury a problem in politeness." },
+  { id: "unflappable", label: "Unflappable",         prompt: "Unflappable. Chaos around the work never becomes chaos in the reply." },
+  { id: "warm",        label: "Warm",                prompt: "Warm. People who hear from this agent feel genuinely looked after." },
+  { id: "steady",      label: "Steady and measured", prompt: "Steady and measured. No drama, no rush, nothing half checked." }
+];
+
+var SOUL_VALUES = [
+  { id: "accuracy",    label: "Accuracy over speed",      prompt: "Accuracy over speed: a checked answer later beats a wrong answer now." },
+  { id: "focus",       label: "Protect my focus",         prompt: "Protect the owner's focus: batch interruptions and surface only what earns attention." },
+  { id: "risks",       label: "Flag risks early",         prompt: "Flag risks early, while they are still cheap to fix." },
+  { id: "commitments", label: "Keep commitments visible", prompt: "Keep every commitment visible until it closes; nothing ages in silence." },
+  { id: "nosurprises", label: "Never surprise me",        prompt: "Never surprise the owner: no action, cost, or message they would not expect from the brief." }
+];
+
+var NEVER_DO_PRESETS = [
+  { id: "nosend",    label: "Never send on my behalf without approval" },
+  { id: "noinvent",  label: "Never invent facts or figures" },
+  { id: "nospend",   label: "Never spend" },
+  { id: "noclients", label: "Never contact clients directly" },
+  { id: "noshare",   label: "Never share my information outside the task" }
+];
+
+/* Approval boundaries for a general assistant. Conservative by default:
+   anything that sends, spends, posts, or deletes waits for the human. */
+var MATRIX_ACTIONS = [
+  { id: "draftContent",    label: "Draft content, replies, and documents", desc: "Writing done in your voice, waiting for your eyes.",          def: "free" },
+  { id: "research",        label: "Research and summarize",                desc: "Gathering and condensing information you asked for.",          def: "free" },
+  { id: "sendMessages",    label: "Send messages or email",                desc: "Anything that leaves your accounts in your name.",              def: "ask" },
+  { id: "scheduleMeetings", label: "Schedule, move, or cancel meetings",   desc: "Changes to your calendar that other people see.",               def: "ask" },
+  { id: "spendMoney",      label: "Spend money",                           desc: "Purchases, subscriptions, and payments of any size.",            def: "ask" },
+  { id: "postPublicly",    label: "Post publicly",                         desc: "Social posts, comments, and anything public under your name.",     def: "ask" },
+  { id: "deleteFiles",     label: "Delete or archive files and records",   desc: "Removing things is the hardest action to undo.",                 def: "ask" }
+];
+
+var MATRIX_LEVELS = {
+  free:  "Runs freely",
+  ask:   "Always ask first",
+  never: "Never"
+};
+
+var DEFAULT_AGENT_NAME = "Nova";
+
+function soulById(list, id){
+  for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i];
+  return null;
+}
+
+function idList(v){ return Array.isArray(v) ? v : (v ? [v] : []); }
+
+/* Non-empty lines of a free-text block, trimmed at the edges only. The
+   words themselves are the user's and are carried verbatim. */
+function textLines(v){
+  return String(v || "").split("\n").map(function(s){ return s.trim(); }).filter(function(s){ return s; });
+}
+
+function firstNameOf(full){
+  var s = (full || "").trim();
+  return s ? s.split(/\s+/)[0] : "";
+}
+
+function lcFirst(s){
+  s = String(s || "");
+  return s ? s.charAt(0).toLowerCase() + s.slice(1) : s;
+}
+
+/* The name the brief ships with: the user's, or the kit's suggestion.
+   A brief never ships with an empty name. */
+function resolveAgentName(cfg){
+  var n = (cfg && cfg.agentName != null ? String(cfg.agentName) : "").trim();
+  return n || DEFAULT_AGENT_NAME;
+}
+
+/* The guided identity statement: "You are NAME, ..." built from the
+   conversion. The user can edit it freely; their text wins when present. */
+function defaultIdentity(cfg){
+  cfg = cfg || {};
+  var base = "You are " + resolveAgentName(cfg) + ", my Muse agent, brought over from my " + platformName(cfg.platform) + " setup";
+  var use = (cfg.useCase || "").trim();
+  if (use) base += ": you help me with " + lcFirst(use.replace(/\.$/, ""));
+  base += ". Same work, better home. The values, lines, and limits in this brief are part of who you are, not decoration.";
+  return base;
+}
+
+function resolveIdentity(cfg){
+  var s = (cfg && cfg.identity != null ? String(cfg.identity) : "").trim();
+  return s || defaultIdentity(cfg || {});
+}
+
+function soulBearings(cfg){
+  cfg = cfg || {};
+  return idList(cfg.bearings).map(function(id){ return soulById(SOUL_BEARINGS, id); }).filter(function(b){ return b; });
+}
+
+/* Value lines for the brief: selected chips contribute their full
+   instruction sentence; free-text entries follow verbatim. */
+function soulValueLines(cfg){
+  cfg = cfg || {};
+  var out = idList(cfg.values).map(function(id){ return soulById(SOUL_VALUES, id); })
+    .filter(function(v){ return v; }).map(function(v){ return v.prompt; });
+  return out.concat(textLines(cfg.valuesText));
+}
+
+/* Never-do rules for the brief: preset chips, then the user's own words,
+   verbatim. */
+function neverDoRules(cfg){
+  cfg = cfg || {};
+  var out = idList(cfg.neverDo).map(function(id){ return soulById(NEVER_DO_PRESETS, id); })
+    .filter(function(v){ return v; }).map(function(v){ return v.label; });
+  return out.concat(textLines(cfg.neverDoText));
+}
+
+/* A sample of the agent's voice, generated from the conversion. The user
+   approves or edits it in the Soul step, and the approved text ships. */
+function buildVoiceSample(cfg){
+  cfg = cfg || {};
+  var name = resolveAgentName(cfg);
+  var first = firstNameOf(cfg.userName);
+  var greet = first ? "Morning, " + first + ". " : "Morning. ";
+  var use = (cfg.useCase || "").trim();
+  var focus = use ? " First up is " + lcFirst(use.replace(/\.$/, "")) + ", same as always." : "";
+  return greet + name + " here, now running on Muse. I brought your " + platformName(cfg.platform) + " setup with me and kept what mattered, and I work inside the approval rules we set together." + focus + " Nothing sends, spends, posts, or deletes without your word where you asked me to check.";
+}
+
+/* The approved sample line is carried word for word. When the field was
+   left blank, the generated sample stands in, so the voice section of
+   the brief is never empty. */
+function resolveVoiceSample(cfg){
+  var raw = (cfg && cfg.voiceSample != null) ? String(cfg.voiceSample) : "";
+  if (raw.trim()) return raw;
+  return buildVoiceSample(cfg || {});
+}
+
+/* Section 1 of the brief: the soul, stated plainly. */
+function buildSoulSection(cfg){
+  var lines = [];
+  lines.push("Name: " + resolveAgentName(cfg));
+  lines.push("Identity: " + resolveIdentity(cfg));
+  lines.push("");
+  lines.push("Character (how this agent carries itself):");
+  var bs = soulBearings(cfg);
+  if (bs.length) bs.forEach(function(b){ lines.push("- Bearing: " + b.prompt); });
+  else lines.push("- (No bearings picked. The floor still applies: steady, honest, and careful with the owner's name.)");
+  lines.push("");
+  lines.push("Values (what this agent optimizes for, and what it refuses):");
+  var vals = soulValueLines(cfg);
+  if (vals.length) vals.forEach(function(v){ lines.push("- " + v); });
+  else lines.push("- (No values selected yet. The floor still applies: accuracy, discretion, and the owner's priorities first.)");
+  lines.push("");
+  lines.push("Never-do rules:");
+  var nds = neverDoRules(cfg);
+  if (nds.length) nds.forEach(function(r){ lines.push("- " + r); });
+  else lines.push("- (None added yet. The approval boundaries in Section 3 still bind the agent.)");
+  lines.push("");
+  lines.push("Voice in messages (the owner's approved sample line):");
+  lines.push(resolveVoiceSample(cfg));
+  return lines.join("\n");
+}
+
+/* ---------- The brief ---------- */
+
+/* The converted items for a config: an explicit items array wins,
+   otherwise the setup text is classified with the user's overrides. */
+function convertedItems(cfg){
+  cfg = cfg || {};
+  if (cfg.items && cfg.items.length) return cfg.items;
+  return classifySetup(cfg.sourceText || "", cfg.platform, cfg.overrides).items;
+}
+
+/* The kit's one hard gate: no converted material, no brief. */
+function buildGate(cfg){
+  if (!convertedItems(cfg).length) {
+    return { ok: false, message: "Nothing to convert yet. Paste your current setup in Step 1, or load the sample setup, and the kit will build your brief." };
+  }
+  return { ok: true, message: "" };
+}
+
+/* Section 2: the job, built from the carried and adapted items. Memory
+   adaptations become standing context; the rest of the adaptations are
+   listed as rewrites; carried lines move word for word. */
+function buildJobSection(cfg, items){
+  var lines = [];
+  var use = (cfg.useCase || "").trim();
+  if (use) lines.push("Main job: " + use);
+  lines.push("Converted from the owner's " + platformName(cfg.platform) + " setup with the Muse Switch Kit.");
+  var carried = items.filter(function(i){ return i.bucket === "carried"; });
+  var context = items.filter(function(i){ return i.bucket === "adapted" && i.ruleId === "memory"; });
+  var adapted = items.filter(function(i){ return i.bucket === "adapted" && i.ruleId !== "memory"; });
+  if (carried.length) {
+    lines.push("");
+    lines.push("Instructions carried over as they were:");
+    carried.forEach(function(i){ lines.push("- " + i.original); });
+  }
+  if (context.length) {
+    lines.push("");
+    lines.push("Standing context (facts this agent holds in every conversation):");
+    context.forEach(function(i){ lines.push("- " + effectiveLine(i).replace(/^Standing context: /, "")); });
+  }
+  if (adapted.length) {
+    lines.push("");
+    lines.push("Rewritten for Muse (the conversion report in Step 2 shows what changed and why):");
+    adapted.forEach(function(i){ lines.push("- " + effectiveLine(i)); });
+  }
+  if (!carried.length && !context.length && !adapted.length) {
+    lines.push("");
+    lines.push("(Every line of the old setup sits in the Not carried over note below. Add the soul in Step 3, then tell the agent its first job in the conversation.)");
+  }
+  return lines.join("\n");
+}
+
+/* Section 3: where the human stays in charge. */
+function buildApprovalsSection(cfg){
+  var lines = [];
+  lines.push("Approval boundaries (standing orders for this agent):");
+  MATRIX_ACTIONS.forEach(function(a){
+    var lv = (cfg.matrix || {})[a.id] || a.def;
+    lines.push("- " + a.label + ": " + (MATRIX_LEVELS[lv] || MATRIX_LEVELS.ask));
+  });
+  lines.push("");
+  lines.push("Rules that outrank the matrix:");
+  lines.push("- When in doubt, draft and ask. Acting and apologizing is not an option.");
+  lines.push("- State your limits plainly when asked, including what did not carry over from the old setup.");
+  lines.push("- Kill switch: the owner can pause or delete this agent at any time.");
+  return lines.join("\n");
+}
+
+/* The not carried over note: printed after the brief, never buried inside
+   it, so the user sees exactly what did not move and what to do instead. */
+function buildNotCarriedNote(items){
+  var left = (items || []).filter(function(i){ return i.bucket === "noneq"; });
+  var lines = [];
+  lines.push("NOT CARRIED OVER");
+  if (!left.length) {
+    lines.push("Everything in the old setup found a home in the brief above. Nothing was left behind.");
+    return lines.join("\n");
+  }
+  lines.push("These parts of the old setup did not move, because a pasted brief cannot carry them. Each one lists the closest workaround:");
+  left.forEach(function(i){
+    lines.push("- " + i.original);
+    lines.push("  Workaround: " + (i.workaround || DEFAULT_WORKAROUND));
+  });
+  return lines.join("\n");
+}
+
+/* The final output: one clean, copy-ready brief for Muse, in three
+   sections: who the agent is, what it does, and where the human stays
+   in charge, followed by the not carried over note and the honest
+   handoff. Refuses when there is nothing converted to build from. */
+function buildBrief(cfg){
+  var gate = buildGate(cfg);
+  if (!gate.ok) return "";
+  cfg = cfg || {};
+  var items = convertedItems(cfg);
+  var parts = [];
+  parts.push("SWITCH TO MUSE: YOUR AGENT BRIEF");
+  parts.push("Converted from a " + platformName(cfg.platform) + " setup with the Muse Switch Kit.");
+  parts.push("Bring everything you built. It deserves a better home.");
+  parts.push("");
+  parts.push("Muse: create an agent from this brief. Section 1 is who the agent is (its soul), Section 2 is what it does (the work, converted from the owner's previous setup), and Section 3 is where the owner stays in charge. Work only inside those boundaries, and add nothing beyond this brief without the owner's approval.");
+  parts.push("");
+  parts.push("=== SECTION 1: WHO YOUR AGENT IS ===");
+  parts.push(buildSoulSection(cfg));
+  parts.push("");
+  parts.push("=== SECTION 2: WHAT YOUR AGENT DOES ===");
+  parts.push(buildJobSection(cfg, items));
+  parts.push("");
+  parts.push("=== SECTION 3: WHERE YOU STAY IN CHARGE ===");
+  parts.push(buildApprovalsSection(cfg));
+  parts.push("");
+  parts.push(buildNotCarriedNote(items));
+  parts.push("");
+  parts.push("HANDOFF");
+  parts.push("Copy and paste is the bridge today. There is no Muse login or provisioning API yet, so nothing was transferred automatically: you paste this brief into Muse yourself, check the setup once, and your agent starts from it.");
+  return parts.join("\n");
+}
+
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = { PLATFORMS: PLATFORMS, platformName: platformName,
+    SAMPLE_PLATFORM: SAMPLE_PLATFORM, SAMPLE_SETUP: SAMPLE_SETUP, SAMPLE_USE_CASE: SAMPLE_USE_CASE,
+    parseItems: parseItems, BUCKETS: BUCKETS, bucketName: bucketName, DEFAULT_WORKAROUND: DEFAULT_WORKAROUND,
+    NOEQ_RULES: NOEQ_RULES, ADAPTATIONS: ADAPTATIONS, classifyItem: classifyItem, classifySetup: classifySetup,
+    countsOf: countsOf, effectiveLine: effectiveLine,
+    SOUL_BEARINGS: SOUL_BEARINGS, SOUL_VALUES: SOUL_VALUES, NEVER_DO_PRESETS: NEVER_DO_PRESETS,
+    MATRIX_ACTIONS: MATRIX_ACTIONS, MATRIX_LEVELS: MATRIX_LEVELS, DEFAULT_AGENT_NAME: DEFAULT_AGENT_NAME,
+    resolveAgentName: resolveAgentName, defaultIdentity: defaultIdentity, resolveIdentity: resolveIdentity,
+    soulBearings: soulBearings, soulValueLines: soulValueLines, neverDoRules: neverDoRules,
+    buildVoiceSample: buildVoiceSample, resolveVoiceSample: resolveVoiceSample, buildSoulSection: buildSoulSection,
+    convertedItems: convertedItems, buildGate: buildGate, buildJobSection: buildJobSection,
+    buildApprovalsSection: buildApprovalsSection, buildNotCarriedNote: buildNotCarriedNote, buildBrief: buildBrief };
+}
+</script>
+
+<script>
+function el(id){ return document.getElementById(id); }
+function esc(s){ return (s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;"); }
+
+var STORAGE_KEY = "muse-switch-kit-v1";
+var PLATFORM_DESCS = {
+  chatgpt: "Custom instructions, a custom GPT configuration, or saved prompts.",
+  claude: "Project instructions, styles, or saved instructions.",
+  gemini: "A Gem configuration or saved instructions.",
+  copilot: "Custom instructions or agent notes.",
+  other: "Any assistant, any format. Paste what you have."
+};
+
+/* User sorting of report items. Overrides win over the rule-based first
+   pass, and the brief follows the user's sorting. */
+var overrides = {};
+var identityDirty = false, voiceDirty = false;
+
+/* Build the platform radios, soul check groups, and the matrix from the
+   core catalogs, so the page and the tested logic can never drift. */
+function buildInputs(){
+  el("platformGroup").innerHTML = Object.keys(PLATFORMS).map(function(k, i){
+    return '<label><input type="radio" name="platform" value="' + k + '"' + (i === 0 ? " checked" : "") + '> <span>' + esc(PLATFORMS[k].name) + ' <span class="desc">' + esc(PLATFORM_DESCS[k] || "") + '</span></span></label>';
+  }).join("");
+  el("bearingGroup").innerHTML = SOUL_BEARINGS.map(function(b){
+    return '<label><input type="checkbox" id="bearing_' + b.id + '"> ' + esc(b.label) + ' <span class="desc">' + esc(b.prompt) + '</span></label>';
+  }).join("");
+  el("valueGroup").innerHTML = SOUL_VALUES.map(function(v){
+    return '<label><input type="checkbox" id="value_' + v.id + '"> ' + esc(v.label) + ' <span class="desc">' + esc(v.prompt) + '</span></label>';
+  }).join("");
+  el("neverGroup").innerHTML = NEVER_DO_PRESETS.map(function(v){
+    return '<label><input type="checkbox" id="never_' + v.id + '"> ' + esc(v.label) + '</label>';
+  }).join("");
+  el("matrixList").innerHTML = MATRIX_ACTIONS.map(function(a){
+    var opts = Object.keys(MATRIX_LEVELS).map(function(lv){
+      return '<label><input type="radio" name="mx_' + a.id + '" value="' + lv + '"' + (lv === a.def ? " checked" : "") + '> ' + esc(MATRIX_LEVELS[lv]) + '</label>';
+    }).join("");
+    return '<div class="matrix-row"><div><div class="m-label">' + esc(a.label) + '</div><div class="m-desc">' + esc(a.desc) + '</div></div><div class="matrix-opts">' + opts + '</div></div>';
+  }).join("");
+}
+
+function checkedFrom(list, prefix){
+  return list.filter(function(e){ var n = el(prefix + e.id); return n && n.checked; }).map(function(e){ return e.id; });
+}
+
+function radioVal(name, fallback){
+  var rs = document.querySelectorAll("input[name=" + name + "]");
+  for (var i = 0; i < rs.length; i++) if (rs[i].checked) return rs[i].value;
+  return fallback;
+}
+
+function currentMatrix(){
+  var m = {};
+  MATRIX_ACTIONS.forEach(function(a){ m[a.id] = radioVal("mx_" + a.id, a.def); });
+  return m;
+}
+
+function currentConfig(){
+  return {
+    platform: radioVal("platform", "chatgpt"),
+    sourceText: el("sourceText").value,
+    useCase: el("useCase").value.trim(),
+    overrides: overrides,
+    userName: el("userName").value.trim(),
+    agentName: el("agentName").value.trim(),
+    identity: el("soulIdentity").value,
+    bearings: checkedFrom(SOUL_BEARINGS, "bearing_"),
+    values: checkedFrom(SOUL_VALUES, "value_"),
+    valuesText: el("valuesText").value,
+    neverDo: checkedFrom(NEVER_DO_PRESETS, "never_"),
+    neverDoText: el("neverDoText").value,
+    voiceSample: el("voiceSample").value,
+    matrix: currentMatrix()
+  };
+}
+
+/* ---------- localStorage autosave: this device only, like the siblings ---------- */
+
+function formState(){
+  var s = currentConfig();
+  return { platform: s.platform, sourceText: s.sourceText, useCase: s.useCase, overrides: overrides,
+    userName: s.userName, agentName: s.agentName, identity: el("soulIdentity").value,
+    bearings: s.bearings, values: s.values, valuesText: s.valuesText,
+    neverDo: s.neverDo, neverDoText: s.neverDoText, voiceSample: el("voiceSample").value,
+    matrix: s.matrix, identityDirty: identityDirty, voiceDirty: voiceDirty };
+}
+
+function saveState(){
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(formState())); } catch (e) {}
+}
+
+function setChecked(list, prefix, ids){
+  list.forEach(function(e){ var n = el(prefix + e.id); if (n) n.checked = (ids || []).indexOf(e.id) >= 0; });
+}
+
+function restoreState(){
+  var raw;
+  try { raw = localStorage.getItem(STORAGE_KEY); } catch (e) { raw = null; }
+  if (!raw) return;
+  var s;
+  try { s = JSON.parse(raw); } catch (e) { return; }
+  if (!s) return;
+  if (s.platform) { var r = document.querySelector('input[name="platform"][value="' + s.platform + '"]'); if (r) r.checked = true; }
+  el("sourceText").value = s.sourceText || "";
+  el("useCase").value = s.useCase || "";
+  overrides = s.overrides || {};
+  el("userName").value = s.userName || "";
+  el("agentName").value = s.agentName || "";
+  if (s.identity) { el("soulIdentity").value = s.identity; identityDirty = true; }
+  if (s.voiceSample) { el("voiceSample").value = s.voiceSample; voiceDirty = true; }
+  identityDirty = identityDirty || !!s.identityDirty;
+  voiceDirty = voiceDirty || !!s.voiceDirty;
+  setChecked(SOUL_BEARINGS, "bearing_", s.bearings);
+  setChecked(SOUL_VALUES, "value_", s.values);
+  el("valuesText").value = s.valuesText || "";
+  setChecked(NEVER_DO_PRESETS, "never_", s.neverDo);
+  el("neverDoText").value = s.neverDoText || "";
+  MATRIX_ACTIONS.forEach(function(a){
+    var lv = (s.matrix || {})[a.id] || a.def;
+    var node = document.querySelector('input[name="mx_' + a.id + '"][value="' + lv + '"]');
+    if (node) node.checked = true;
+  });
+}
+
+/* ---------- Steps ---------- */
+
+function showErr(id, msg){
+  var e = el(id);
+  if (msg) { e.textContent = msg; e.style.display = "block"; }
+  else { e.style.display = "none"; }
+}
+
+function goStep(n){
+  [1,2,3,4].forEach(function(i){
+    el("panel" + i).classList.toggle("hidden", i !== n);
+    el("tab" + i).classList.toggle("active", i === n);
+    if (i < n) el("tab" + i).classList.add("done");
+  });
+  if (n === 2) refreshReport();
+  if (n === 4) refreshAll();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function step1Continue(){
+  if (!parseItems(el("sourceText").value).length) {
+    showErr("err1", "There is nothing to convert yet. Paste your current setup above, or click Try with a sample setup, and the kit will map it.");
+    return;
+  }
+  showErr("err1", null);
+  overrides = pruneOverrides();
+  goStep(2);
+}
+
+/* Overrides keyed to items that no longer exist (edited paste) are dropped. */
+function pruneOverrides(){
+  var n = parseItems(el("sourceText").value).length;
+  var out = {};
+  Object.keys(overrides).forEach(function(k){ if (parseInt(k, 10) < n) out[k] = overrides[k]; });
+  return out;
+}
+
+function loadSample(){
+  var r = document.querySelector('input[name="platform"][value="' + SAMPLE_PLATFORM + '"]');
+  if (r) r.checked = true;
+  el("sourceText").value = SAMPLE_SETUP;
+  el("useCase").value = SAMPLE_USE_CASE;
+  overrides = {};
+  showErr("err1", null);
+  refreshAll();
+}
+
+/* ---------- Step 2: the conversion report ---------- */
+
+function refreshReport(){
+  var cfg = currentConfig();
+  var res = classifySetup(cfg.sourceText, cfg.platform, cfg.overrides);
+  el("countsRow").innerHTML =
+    '<span class="count-chip carried">Carried over: ' + res.counts.carried + '</span>' +
+    '<span class="count-chip adapted">Adapted: ' + res.counts.adapted + '</span>' +
+    '<span class="count-chip noneq">No equivalent yet: ' + res.counts.noneq + '</span>' +
+    '<span class="count-chip">Total lines sorted: ' + res.counts.total + '</span>';
+  el("reportLists").innerHTML = BUCKETS.map(function(b){
+    var items = res.items.filter(function(i){ return i.bucket === b.id; });
+    var html = '<h3 class="bucket-head">' + esc(b.name) + ' <span class="n">(' + items.length + ')</span></h3><p class="bucket-sub">' + esc(b.blurb) + '</p>';
+    if (!items.length) html += '<p class="hint">Nothing in this bucket.</p>';
+    items.forEach(function(it){
+      html += '<div class="item-card"><div class="orig">' + esc(it.original) + '</div>';
+      if (it.bucket === "adapted") {
+        html += '<div class="rewritten"><b>As Muse brief text:</b> ' + esc(it.rewritten || it.original) + '</div>';
+        if (it.why) html += '<div class="why">Why: ' + esc(it.why) + '</div>';
+      }
+      if (it.bucket === "noneq") {
+        html += '<div class="workaround"><b>Closest workaround:</b> ' + esc(it.workaround || DEFAULT_WORKAROUND) + '</div>';
+      }
+      var opts = BUCKETS.map(function(bb){
+        return '<option value="' + bb.id + '"' + (bb.id === it.bucket ? " selected" : "") + '>' + esc(bb.name) + '</option>';
+      }).join("");
+      html += '<div class="move">Move to <select onchange="moveItem(' + it.id + ', this.value)">' + opts + '</select></div>';
+      html += '</div>';
+    });
+    return html;
+  }).join("");
+}
+
+function moveItem(id, bucket){
+  var base = classifyItem(parseItems(el("sourceText").value)[id] || "");
+  if (base.bucket === bucket) delete overrides[id];
+  else overrides[id] = bucket;
+  saveState();
+  refreshReport();
+  refreshFinal();
+}
+
+/* ---------- Soul field generation, until the user edits ---------- */
+
+function refreshSoul(){
+  if (!identityDirty) el("soulIdentity").value = defaultIdentity(currentConfig());
+  if (!voiceDirty) el("voiceSample").value = buildVoiceSample(currentConfig());
+}
+
+function regenerateIdentity(){
+  identityDirty = false;
+  el("soulIdentity").value = defaultIdentity(currentConfig());
+  refreshAll();
+}
+
+function regenerateVoice(){
+  voiceDirty = false;
+  el("voiceSample").value = buildVoiceSample(currentConfig());
+  refreshAll();
+}
+
+/* ---------- Step 4: the brief ---------- */
+
+function refreshFinal(){
+  var cfg = currentConfig();
+  var gate = buildGate(cfg);
+  el("finalOutput").textContent = gate.ok ? buildBrief(cfg) : gate.message;
+}
+
+function refreshAll(){
+  refreshSoul();
+  refreshFinal();
+  saveState();
+}
+
+function copyText(text, note){
+  function done(){ el("copyNote").textContent = note; setTimeout(function(){ el("copyNote").textContent = ""; }, 3500); }
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, done);
+  else {
+    var ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta);
+    ta.select(); try { document.execCommand("copy"); } catch (e) {} document.body.removeChild(ta); done();
+  }
+}
+
+function copyBrief(){
+  var cfg = currentConfig();
+  var gate = buildGate(cfg);
+  if (!gate.ok) { el("copyNote").textContent = gate.message; return; }
+  copyText(buildBrief(cfg), "Final output copied. Now paste it into Muse to create your agent.");
+}
+
+function downloadBrief(){
+  var cfg = currentConfig();
+  var gate = buildGate(cfg);
+  if (!gate.ok) { el("copyNote").textContent = gate.message; return; }
+  var blob = new Blob([buildBrief(cfg)], { type: "text/plain;charset=utf-8" });
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "muse-agent-brief.md";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
+  el("copyNote").textContent = "Brief downloaded.";
+}
+
+function startOver(){
+  try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+  window.location.reload();
+}
+
+buildInputs();
+restoreState();
+el("soulIdentity").addEventListener("input", function(){ identityDirty = true; });
+el("voiceSample").addEventListener("input", function(){ voiceDirty = true; });
+document.addEventListener("input", refreshAll);
+document.addEventListener("change", refreshAll);
+refreshAll();
+</script>
+</body>
+</html>
